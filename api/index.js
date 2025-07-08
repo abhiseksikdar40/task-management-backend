@@ -2,8 +2,8 @@ const express = require("express");
 const serverless = require("serverless-http");
 const cors = require("cors");
 const JWT = require("jsonwebtoken");
-const Signup = require("./models/Signup.models");
-const { taskManagementData } = require("./db/db.connect");
+const Signup = require("../models/Signup.models");
+const { taskManagementData } = require("../db/db.connect");
 
 const app = express();
 taskManagementData();
