@@ -1,5 +1,7 @@
 {
-  "version": 2,
-  "builds": [{ "src": "index.js", "use": "@vercel/node" }],
-  "rewrites": [{ "source": "/(.*)", "destination": "index.js" }]
+  "rewrites": [
+    { "source": "/auth", "destination": "/api/auth" },
+    { "source": "/v1/login/user", "destination": "/api/v1/login/user" },
+    { "source": "/v1/signup/user", "destination": "/api/v1/signup/user" }
+  ]
 }
