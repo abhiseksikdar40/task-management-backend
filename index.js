@@ -1,9 +1,11 @@
 const express = require("express");
 const serverless = require("serverless-http");
-const app = express();
+const cors = require("cors");
 const JWT = require("jsonwebtoken");
 const Signup = require("./models/Signup.models");
 const { taskManagementData } = require("./db/db.connect");
+
+const app = express();
 
 
 taskManagementData();
@@ -12,29 +14,25 @@ taskManagementData();
 app.use(express.json());
 
 
-app.use((req, res, next) => {
-  const allowedOrigins = [
-    "http://localhost:5173",
-    "https://task-management-frontend-taupe-eight.vercel.app",
-  ];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://task-management-frontend-taupe-eight.vercel.app"
+];
 
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  // Handle preflight
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  next();
-});
-
-// ✅ Secret for JWT
+// ✅ JWT Secret
 const JWT_SECRET = "Your_jwt_secret";
 
 // ✅ Signup Route
@@ -50,13 +48,13 @@ app.post("/v1/signup/user", async (req, res) => {
     await newUser.save();
 
     const token = JWT.sign({ email: useremail }, JWT_SECRET, {
-      expiresIn: "24h",
+      expiresIn: "24h"
     });
 
     res.status(201).json({
       message: "User Created Successfully.",
       user: newUser,
-      token,
+      token
     });
   } catch (error) {
     console.error("Signup error:", error);
@@ -84,13 +82,13 @@ app.post("/v1/login/user", async (req, res) => {
     }
 
     const token = JWT.sign({ email: user.useremail }, JWT_SECRET, {
-      expiresIn: "24h",
+      expiresIn: "24h"
     });
 
     res.status(200).json({
       message: "Login successful",
       user,
-      token,
+      token
     });
   } catch (error) {
     console.error("Login Error:", error);
@@ -116,11 +114,11 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
-// ✅ Auth Check Route
+// ✅ Auth Protected Route
 app.get("/auth", verifyJWT, (req, res) => {
   res.json({ message: "Secure Route Access Granted", user: req.user });
 });
 
-// ✅ Export for Vercel
+// ✅ Vercel Export
 module.exports = app;
 module.exports.handler = serverless(app);
