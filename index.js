@@ -15,9 +15,9 @@ app.use(cors({
   allowedHeaders: ["Content-Type"]
 }))
 
-app.listen(5001, () => {
-  console.log('Database running on 5001')
-})
+// app.listen(5001, () => {
+//   console.log('Database running on 5001')
+// })
 
 const JWT_SECRET = "Your_jwt_secret"
 
