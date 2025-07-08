@@ -22,6 +22,8 @@ app.use(cors({
 
 const JWT_SECRET = "Your_jwt_secret"
 
+
+// ✅ Signup Route
 async function getNewSignUp(newUser) {
   try {
     const newSignup = new Signup(newUser)
@@ -56,6 +58,43 @@ app.post('/v1/signup/user', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: "Failed To Create User!" });
+  }
+});
+
+
+// ✅ Login Route
+app.post('/v1/login/user', async (req, res) => {
+  const { useremail, userpassword } = req.body;
+
+  if (!useremail || !userpassword) {
+    return res.status(400).json({ error: "Email and password are required" });
+  }
+
+  try {
+    const user = await Signup.findOne({ useremail });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.userpassword !== userpassword) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const token = JWT.sign(
+      { email: user.useremail },
+      JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      user,
+      token
+    });
+  } catch (error) {
+    console.error("Login Error:", error);
+    res.status(500).json({ error: "Failed to login" });
   }
 });
 
