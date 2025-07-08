@@ -13,7 +13,7 @@ app.use(cors({
   origin: ["http://localhost:5173",
   "https://task-management-frontend-taupe-eight.vercel.app/"],
   methods: ["GET", "POST", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type",  "Authorization"]
 }))
 
 // app.listen(5001, () => {
