@@ -6,17 +6,13 @@ const Signup = require("./models/Signup.models");
 const { taskManagementData } = require("./db/db.connect");
 
 const app = express();
-
-
 taskManagementData();
-
-
 app.use(express.json());
 
-
+// ✅ CORS Middleware Setup
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://task-management-frontend-taupe-eight.vercel.app"
+  "https://task-management-frontend-taupe-eight.vercel.app",
 ];
 
 app.use(cors({
@@ -114,11 +110,11 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
-// ✅ Auth Protected Route
+// ✅ Protected Route
 app.get("/auth", verifyJWT, (req, res) => {
   res.json({ message: "Secure Route Access Granted", user: req.user });
 });
 
-// ✅ Vercel Export
+// ✅ Serverless Export for Vercel
 module.exports = app;
 module.exports.handler = serverless(app);
