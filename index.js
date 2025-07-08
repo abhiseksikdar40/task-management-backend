@@ -100,24 +100,21 @@ app.post('/v1/login/user', async (req, res) => {
 
 
 const verifyJWT = (req, res, next) => {
-  const token = req.headers['authorization']
-  if(!token) {
-    res.status(401).json({ message: "No token provided!"})
+  const token = req.headers['authorization'];
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided!" });
   }
 
-
-  try{
-    const decodedToken = JWT.verify(token, JWT_SECRET)
-    req.user = decodedToken
-    next()
+  try {
+    const decodedToken = JWT.verify(token, JWT_SECRET);
+    req.user = decodedToken;
+    next();
   } catch (error) {
-    res.status(402).json({message: "Invalid Token!"})
+    console.error("JWT Verify Error:", error.message);
+    return res.status(403).json({ message: "Invalid Token!" });
   }
-}
-
-app.get("/auth", verifyJWT, (req, res) => {
-  res.json({ message: "Secure" });
-});
+};
 
 
 
