@@ -3,6 +3,10 @@ const serverless = require("serverless-http");
 const cors = require("cors");
 const JWT = require("jsonwebtoken");
 const Signup = require("../models/Signup.models");
+const Project = require('../models/Project.models')
+const Task = require('../models/Task.models')
+const Team = require('../models/Team.models')
+const User = require('../models/User.models')
 const { taskManagementData } = require("../db/db.connect");
 
 const app = express();
@@ -114,6 +118,235 @@ const verifyJWT = (req, res, next) => {
 app.get("/auth", verifyJWT, (req, res) => {
   res.json({ message: "Secure Route Access Granted", user: req.user });
 });
+
+
+
+// ✅ Project Route
+async function createProject(newProject) {
+  try {
+    const createNewProject = new Project(newProject)
+    const savedProject = await createNewProject.save()
+    return savedProject;
+  } catch (error) {
+    console.log('Error While Creating New Project!', error)
+  }
+}
+
+app.post('/v1/create/project', verifyJWT, async (req, res) => {
+  try {
+    const createdProject = await createProject(req.body)
+    res.status(201).json({ message: "Project Created Successfully.", project: createdProject})
+  } catch (error) {
+    res.status(500).json({ error: "Error Occured While Creating New Project!"})
+  }
+})
+
+
+app.get('/v1/projects', verifyJWT, async (req, res) => {
+  try {
+    const allProjects = await Project.find()
+
+    if(allProjects.length !== 0){
+      res.json(allProjects)
+    } else {
+      res.status(404).json({ message: "Project Not Found!"})
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error Occured While Fetching All Projects!"})
+  }
+})
+
+app.get('/v1/projects/:id', verifyJWT, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const projectDetails = await Project.findById(id);
+
+    if (!projectDetails) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    res.json(projectDetails);
+  } catch (error) {
+    res.status(500).json({ error: "Error while fetching project details" });
+  }
+});
+
+app.post('/v1/projects/update/:projectid', verifyJWT, async (req, res) => {
+  const { projectid } = req.params;
+  const dataToUpdate = req.body;
+
+  try {
+    const updatedProject = await Project.findByIdAndUpdate(projectid, dataToUpdate, { new: true });
+
+    if (!updatedProject) {
+      return res.status(404).json({ message: "Project not found!" });
+    }
+
+    res.json({ message: "Project updated successfully", project: updatedProject });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update project" });
+  }
+});
+
+
+
+// ✅ Task Route
+async function createTask(newTask) {
+  try {
+    const createTask = new Task(newTask)
+    const savedTask = await createTask.save()
+    return savedTask;
+  } catch (error) {
+    console.log('Error While Creating New Task!', error)
+  }
+}
+
+app.post('/v1/create/task', verifyJWT, async (req, res) => {
+  try {
+    const createdTask = await createTask(req.body)
+    res.status(201).json({ message: "Task Created Successfully.", task: createdTask})
+  } catch (error) {
+    res.status(500).json({ error: "Error Occured While Creating New Task!"})
+  }
+})
+
+
+app.get('/v1/tasks', verifyJWT, async (req, res) => {
+  try {
+    const allTasks = await Task.find().populate('project').populate('team')
+
+    if(allTasks.length !== 0){
+      res.json(allTasks)
+    } else {
+      res.status(404).json({ message: "Task Not Found!"})
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error Occured While Fetching All Tasks!"})
+  }
+})
+
+app.get('/v1/tasks/:id', verifyJWT, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const taskDetails = await Task.findById(id).populate('project').populate('team')
+
+    if (!taskDetails) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.json(taskDetails);
+  } catch (error) {
+    res.status(500).json({ error: "Error while fetching task details" });
+  }
+});
+
+app.post('/v1/tasks/update/:taskid', verifyJWT, async (req, res) => {
+  const { taskid } = req.params;
+  const dataToUpdate = req.body;
+
+  try {
+    const updatedTask = await Task.findByIdAndUpdate( taskid, dataToUpdate, { new: true });
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found!" });
+    }
+
+    res.json({ message: "Task updated successfully", project: updatedTask });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update Task!" });
+  }
+});
+
+
+// ✅ Team Route
+async function createTeam(newTeam) {
+  try {
+    const createTeam = new Team(newTeam)
+    const savedTeam = await createTeam.save()
+    return savedTeam;
+  } catch (error) {
+    console.log('Error While Creating New Team!', error)
+  }
+}
+
+app.post('/v1/create/team', verifyJWT, async (req, res) => {
+  try {
+    const createdTeam = await createTeam(req.body)
+    res.status(201).json({ message: "Team Created Successfully.", team: createdTeam})
+  } catch (error) {
+    res.status(500).json({ error: "Error Occured While Creating New Team!"})
+  }
+})
+
+
+app.get('/v1/teams', verifyJWT, async (req, res) => {
+  try {
+    const allTeams = await Team.find()
+
+    if(allTeams.length !== 0){
+      res.json(allTeams)
+    } else {
+      res.status(404).json({ message: "Team Not Found!"})
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error Occured While Fetching All Team!"})
+  }
+})
+
+app.get('/v1/teams/:id', verifyJWT, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const teamDetails = await Team.findById(id);
+
+    if (!teamDetails) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    res.json(teamDetails);
+  } catch (error) {
+    res.status(500).json({ error: "Error while fetching team details" });
+  }
+});
+
+
+
+// ✅ User Route
+async function createUser(newUser) {
+  try {
+    const createUser = new User(newUser)
+    const savedUser = await createUser.save()
+    return savedUser;
+  } catch (error) {
+    console.log('Error While Creating New User!', error)
+  }
+}
+
+app.post('/v1/create/user', verifyJWT, async (req, res) => {
+  try {
+    const createdUser = await createUser(req.body)
+    res.status(201).json({ message: "User Created Successfully.", user: createdUser})
+  } catch (error) {
+    res.status(500).json({ error: "Error Occured While Creating New User!"})
+  }
+})
+
+app.get('/v1/users', verifyJWT, async (req, res) => {
+  try {
+    const allUsers = await User.find().populate('team')
+
+    if(allUsers.length !== 0){
+      res.json(allUsers)
+    } else {
+      res.status(404).json({ message: "Users Not Found!"})
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error Occured While Fetching All User!"})
+  }
+})
+
 
 // ✅ Serverless Export for Vercel
 module.exports = app;
