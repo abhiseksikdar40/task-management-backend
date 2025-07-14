@@ -98,11 +98,13 @@ app.post("/v1/login/user", async (req, res) => {
 
 // ✅ JWT Middleware
 const verifyJWT = (req, res, next) => {
-  const token = req.headers["authorization"];
+  const authHeader = req.headers["authorization"];
 
-  if (!token) {
+  if (!authHeader) {
     return res.status(401).json({ message: "No token provided!" });
   }
+
+  const token = authHeader.split("")[1]
 
   try {
     const decoded = JWT.verify(token, JWT_SECRET);
