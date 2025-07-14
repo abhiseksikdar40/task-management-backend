@@ -58,9 +58,16 @@ app.post("/v1/signup/user", async (req, res) => {
     });
   } catch (error) {
     console.error("Signup error:", error);
+
+    // Handle duplicate email error
+    if (error.code === 11000 && error.keyPattern?.useremail) {
+      return res.status(409).json({ error: "Email already exists" });
+    }
+
     res.status(500).json({ error: "Failed To Create User!" });
   }
 });
+
 
 // ✅ Login Route
 app.post("/v1/login/user", async (req, res) => {
