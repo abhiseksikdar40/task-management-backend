@@ -5,7 +5,8 @@ const TaskSchema = new mongoose.Schema({
     project: { type: mongoose.Schema.Types.ObjectId, ref: "Project", required: true},
     team: {type: mongoose.Schema.Types.ObjectId, ref: "Team", required: true},
     taskstatus: { type: String, enum: ["To Do", "In Progress", "Completed", "Closed"], default: "To Do"},
-    duedate: { type: Date, required: true}
+    duedate: { type: Date, required: true},
+    priority: {type: String}
 },
 {
     timestamps: true
