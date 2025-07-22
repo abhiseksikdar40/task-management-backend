@@ -1,18 +1,34 @@
-const mongoose = require('mongoose')
-require('dotenv').config()
+const mongoose = require('mongoose');
+require('dotenv').config();
 
-const mongoUrl = process.env.MONGODB
+const mongoUrl = process.env.MONGODB;
 
-const taskManagementData = async () => {
-   try {
-    await mongoose.connect(mongoUrl, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
-    console.log('Database Connected.', mongoose.connection.name)
-   } catch (error) {
-    console.log('Failed To Connected Database!', error)
-   }
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
-module.exports = { taskManagementData }
+const taskManagementData = async () => {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(mongoUrl, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+    console.log("Database connected:", mongoose.connection.name);
+    return cached.conn;
+  } catch (error) {
+    console.error("Database connection error:", error);
+    throw error;
+  }
+};
+
+module.exports = { taskManagementData };
