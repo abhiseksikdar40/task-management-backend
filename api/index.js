@@ -344,7 +344,7 @@ app.post('/v1/create/user', verifyJWT, async (req, res) => {
 
 app.get('/v1/users', verifyJWT, async (req, res) => {
   try {
-    const allUsers = await User.find().populate('team')
+    const allUsers = await User.find()
 
     if(allUsers.length !== 0){
       res.json(allUsers)
