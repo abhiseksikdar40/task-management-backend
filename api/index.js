@@ -35,6 +35,29 @@ app.use(cors({
 // ✅ JWT Secret
 const JWT_SECRET = "Your_jwt_secret";
 
+// ✅ JWT Middleware
+const verifyJWT = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token provided!" });
+  }
+
+  const token = authHeader.split(" ")[1]
+
+  try {
+    const decoded = JWT.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error("JWT Verify Error:", error.message);
+    return res.status(403).json({ message: "Invalid Token!" });
+  }
+};
+
+
+
+
 // ✅ Signup Route
 app.post("/v1/signup/user", async (req, res) => {
   const { fullname, useremail, userpassword } = req.body;
@@ -125,25 +148,6 @@ app.post("/v1/login/user", async (req, res) => {
   }
 });
 
-// ✅ JWT Middleware
-const verifyJWT = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-
-  if (!authHeader) {
-    return res.status(401).json({ message: "No token provided!" });
-  }
-
-  const token = authHeader.split(" ")[1]
-
-  try {
-    const decoded = JWT.verify(token, JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    console.error("JWT Verify Error:", error.message);
-    return res.status(403).json({ message: "Invalid Token!" });
-  }
-};
 
 // ✅ Protected Route
 app.get("/auth", verifyJWT, (req, res) => {
