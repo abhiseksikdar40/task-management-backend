@@ -69,6 +69,28 @@ app.post("/v1/signup/user", async (req, res) => {
 });
 
 
+// ✅ Get Current User Info (From JWT)
+app.get("/v1/user/me", verifyJWT, async (req, res) => {
+  try {
+    const { email } = req.user;
+
+    const user = await Signup.findOne({ useremail: email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      fullname: user.fullname,
+      useremail: user.useremail,
+    });
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    res.status(500).json({ error: "Failed to fetch user data" });
+  }
+});
+
+
 // ✅ Login Route
 app.post("/v1/login/user", async (req, res) => {
   const { useremail, userpassword } = req.body;
