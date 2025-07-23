@@ -70,7 +70,7 @@ app.post("/v1/signup/user", async (req, res) => {
 
 
 // ✅ Get Current User Info (From JWT)
-app.get("/v1/user/me", verifyJWT, async (req, res) => {
+app.get("/v1/signup/user", verifyJWT, async (req, res) => {
   try {
     const { email } = req.user;
 
